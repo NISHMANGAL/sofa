@@ -1,0 +1,76 @@
+name: GitHub Action with Email Notification
+
+on:
+  # Trigger on push to main branch
+  push:
+    branches: [ main ]
+  # Trigger on pull request to main branch
+  pull_request:
+    branches: [ main ]
+  # Allow manual triggering
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout the repository
+      - uses: actions/checkout@v3
+      
+      # Example step - replace with your actual build/test steps
+      - name: Run a sample task
+        run: |
+          echo "Running sample task..."
+          # Your actual build/test commands go here
+          echo "Task completed successfully!"
+          
+      # Send email notification on success
+      - name: Send success email
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: GitHub Action Succeeded
+          body: |
+            GitHub Action workflow completed successfully!
+            
+            Repository: ${{ github.repository }}
+            Workflow: ${{ github.workflow }}
+            Run ID: ${{ github.run_id }}
+            
+            Commit: ${{ github.sha }}
+            Triggered by: ${{ github.actor }}
+            
+            See details: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          to: nmangal@salesforce.com
+          from: GitHub Actions
+          
+      # Send email notification on failure
+      - name: Send failure email
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: GitHub Action Failed
+          body: |
+            GitHub Action workflow failed!
+            
+            Repository: ${{ github.repository }}
+            Workflow: ${{ github.workflow }}
+            Run ID: ${{ github.run_id }}
+            
+            Commit: ${{ github.sha }}
+            Triggered by: ${{ github.actor }}
+            
+            See details: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          to: nmangal@salesforce.com
+          from: GitHub Actions
